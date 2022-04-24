@@ -32,6 +32,17 @@ app.post("/tweets", (req, res) => {
 	res.json("OK")
 })
 
+app.get("/tweets", (req, res) => {
+	console.log(tweets)
+	const lastTweet = []
+	if (tweets.length < 10) res.json(tweets)
+	else {
+		for (let i = tweets.length - 1; i !== tweets.length - 11; i--)
+			lastTweet.push(tweets[i])
+		res.json(lastTweet)
+	}
+})
+
 app.listen(5000, () => {
 	console.log("Server is running on port 5000")
 })
