@@ -9,20 +9,22 @@ const users = []
 const tweets = []
 
 function validateRequests(validate, req) {
-	console.log(req.body)
+	console.log(req.body, "12")
+	console.log(req.headers.user, "13")
 	const errorList = []
 	const keysValidate =
-		validate === "post-/sign-up"
-			? ["username", "avatar"]
-			: ["username", "tweet"]
+		validate === "post-/sign-up" ? ["username", "avatar"] : ["tweet"]
 	const keys = Object.keys(req.body)
 	keys.forEach(key => {
 		if (!keysValidate.includes(key))
 			errorList.push(`The key "${key}" is not valid`)
 	})
-	if (!req.body.username) errorList.push("username is required")
+	if (!req.body.username && validate === "post-/sign-up")
+		errorList.push("username is required")
 	if (!req.body.avatar && validate === "post-/sign-up")
 		errorList.push("avatar is required")
+	if (!req.headers.user && validate === "post-/tweet")
+		errorList.push("Header User is required")
 	if (!req.body.tweet && validate === "post-/tweet")
 		errorList.push("tweet is required")
 
@@ -39,7 +41,7 @@ app.post("/sign-up", (req, res) => {
 			avatar,
 		}
 		users.push(user)
-		console.log(users)
+		console.log(users, "44")
 		res.status(201).json("OK")
 	} else {
 		res.status(400).json({ error: validate })
@@ -49,10 +51,12 @@ app.post("/sign-up", (req, res) => {
 app.post("/tweets", (req, res) => {
 	const validate = validateRequests("post-/tweet", req)
 	if (validate.length === 0) {
-		const { username, tweet } = req.body
+		const { tweet } = req.body
+		const { user } = req.headers
+		console.log(user, "56")
 		const tweetObj = {
 			id: tweets.length + 1,
-			username,
+			username: user,
 			tweet,
 		}
 		tweets.push(tweetObj)
@@ -64,12 +68,14 @@ app.post("/tweets", (req, res) => {
 })
 
 app.get("/tweets", (req, res) => {
-	console.log(tweets, "67")
+	console.log(tweets, "71")
+	const page = parseInt(req.query.page)
+	let start = page === 1 ? tweets.length : tweets.length - (page - 1) * 10
 	const latestTweets = []
 	let count = 10
 	if (tweets.length > 0) {
 		console.log("entrei")
-		for (let i = tweets.length - 1; i >= 0; i--) {
+		for (let i = start - 1; i >= 0; i--) {
 			if (count === 0) break
 			let { avatar } = users.find(
 				user => user.username === tweets[i].username
@@ -83,7 +89,7 @@ app.get("/tweets", (req, res) => {
 			latestTweets.push(lastTweet)
 			count--
 		}
-		res.json(latestTweets)
+		res.status(200).json(latestTweets)
 	} else res.json(latestTweets)
 })
 
@@ -91,7 +97,7 @@ app.get("/tweets/:USERNAME", (req, res) => {
 	const { USERNAME } = req.params
 	console.log(USERNAME)
 	const userTweets = tweets.filter(tweet => tweet.username === USERNAME)
-	res.json(userTweets)
+	res.status(200).json(userTweets)
 })
 
 app.listen(5000, () => {
