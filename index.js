@@ -9,8 +9,6 @@ const users = []
 const tweets = []
 
 function validateRequests(validate, req) {
-	console.log(req.body, "12")
-	console.log(req.headers.user, "13")
 	const errorList = []
 	const keysValidate =
 		validate === "post-/sign-up" ? ["username", "avatar"] : ["tweet"]
@@ -41,7 +39,6 @@ app.post("/sign-up", (req, res) => {
 			avatar,
 		}
 		users.push(user)
-		console.log(users, "44")
 		res.status(201).json("OK")
 	} else {
 		res.status(400).json({ error: validate })
@@ -53,14 +50,12 @@ app.post("/tweets", (req, res) => {
 	if (validate.length === 0) {
 		const { tweet } = req.body
 		const { user } = req.headers
-		console.log(user, "56")
 		const tweetObj = {
 			id: tweets.length + 1,
 			username: user,
 			tweet,
 		}
 		tweets.push(tweetObj)
-		console.log(tweets, "59")
 		res.status(201).json("OK")
 	} else {
 		res.status(400).json({ error: validate })
@@ -70,17 +65,14 @@ app.post("/tweets", (req, res) => {
 app.get("/tweets", (req, res) => {
 	const page = parseInt(req.query.page)
 	if (page <= 0)
-		return res
-			.status(400)
-			.json({
-				error: "Invalid page! The number of page must be greater than 0",
-			})
+		return res.status(400).json({
+			error: "Invalid page! The number of page must be greater than 0",
+		})
 
 	let start = page === 1 ? tweets.length : tweets.length - (page - 1) * 10
 	const latestTweets = []
 	let count = 10
 	if (tweets.length > 0) {
-		console.log("entrei")
 		for (let i = start - 1; i >= 0; i--) {
 			if (count === 0) break
 			let { avatar } = users.find(
@@ -91,7 +83,6 @@ app.get("/tweets", (req, res) => {
 				avatar: avatar,
 				tweet: tweets[i].tweet,
 			}
-			console.log(lastTweet)
 			latestTweets.push(lastTweet)
 			count--
 		}
@@ -101,7 +92,6 @@ app.get("/tweets", (req, res) => {
 
 app.get("/tweets/:USERNAME", (req, res) => {
 	const { USERNAME } = req.params
-	console.log(USERNAME)
 	const userTweets = tweets.filter(tweet => tweet.username === USERNAME)
 	res.status(200).json(userTweets)
 })
