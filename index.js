@@ -87,7 +87,12 @@ app.get("/tweets", (req, res) => {
 	} else res.json(latestTweets)
 })
 
-app.get("/tweets/:USERNAME", (req, res) => {})
+app.get("/tweets/:USERNAME", (req, res) => {
+	const { USERNAME } = req.params
+	console.log(USERNAME)
+	const userTweets = tweets.filter(tweet => tweet.username === USERNAME)
+	res.json(userTweets)
+})
 
 app.listen(5000, () => {
 	console.log("Server is running on port 5000")
