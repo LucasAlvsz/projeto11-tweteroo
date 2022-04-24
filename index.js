@@ -5,7 +5,12 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-const users = []
+const users = [
+	{
+		username: "bobesponja",
+		avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
+	},
+]
 const tweets = []
 
 app.post("/sign-up", (req, res) => {
@@ -34,12 +39,24 @@ app.post("/tweets", (req, res) => {
 
 app.get("/tweets", (req, res) => {
 	console.log(tweets)
-	const lastTweet = []
+	const latestTweets = []
 	if (tweets.length < 10) res.json(tweets)
 	else {
-		for (let i = tweets.length - 1; i !== tweets.length - 11; i--)
-			lastTweet.push(tweets[i])
-		res.json(lastTweet)
+		for (let i = tweets.length - 1; i !== tweets.length - 11; i--) {
+			// console.log(tweets[i].username)
+			// console.log(users)
+			let { avatar } = users.find(
+				user => user.username === tweets[i].username
+			)
+			// console.log(avatar)
+			const lastTweet = {
+				username: tweets[i].username,
+				avatar: avatar,
+				tweet: tweets[i].tweet,
+			}
+			latestTweets.push(lastTweet)
+		}
+		res.json(latestTweets)
 	}
 })
 
