@@ -68,8 +68,14 @@ app.post("/tweets", (req, res) => {
 })
 
 app.get("/tweets", (req, res) => {
-	console.log(tweets, "71")
 	const page = parseInt(req.query.page)
+	if (page <= 0)
+		return res
+			.status(400)
+			.json({
+				error: "Invalid page! The number of page must be greater than 0",
+			})
+
 	let start = page === 1 ? tweets.length : tweets.length - (page - 1) * 10
 	const latestTweets = []
 	let count = 10
