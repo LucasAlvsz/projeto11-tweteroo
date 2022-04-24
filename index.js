@@ -5,40 +5,66 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-const users = [
-	{
-		username: "bobesponja",
-		avatar: "https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info",
-	},
-]
+const users = []
 const tweets = []
 
+function validateRequests(validate, req) {
+	console.log(req.body)
+	const errorList = []
+	const keysValidate =
+		validate === "post-/sign-up"
+			? ["username", "avatar"]
+			: ["username", "tweet"]
+	const keys = Object.keys(req.body)
+	keys.forEach(key => {
+		if (!keysValidate.includes(key))
+			errorList.push(`The key "${key}" is not valid`)
+	})
+	if (!req.body.username) errorList.push("username is required")
+	if (!req.body.avatar && validate === "post-/sign-up")
+		errorList.push("avatar is required")
+	if (!req.body.tweet && validate === "post-/tweet")
+		errorList.push("tweet is required")
+
+	return errorList
+}
+
 app.post("/sign-up", (req, res) => {
-	const { username, avatar } = req.body
-	const user = {
-		id: users.length + 1,
-		username,
-		avatar,
+	const validate = validateRequests("post-/sign-up", req)
+	if (validate.length === 0) {
+		const { username, avatar } = req.body
+		const user = {
+			id: users.length + 1,
+			username,
+			avatar,
+		}
+		users.push(user)
+		console.log(users)
+		res.status(201).json("OK")
+	} else {
+		res.status(400).json({ error: validate })
 	}
-	users.push(user)
-	console.log(users)
-	res.json("OK")
 })
 
 app.post("/tweets", (req, res) => {
-	const { username, tweet } = req.body
-	const tweetObj = {
-		id: tweets.length + 1,
-		username,
-		tweet,
+	const validate = validateRequests("post-/tweet", req)
+	if (validate.length === 0) {
+		const { username, tweet } = req.body
+		const tweetObj = {
+			id: tweets.length + 1,
+			username,
+			tweet,
+		}
+		tweets.push(tweetObj)
+		console.log(tweets, "59")
+		res.status(201).json("OK")
+	} else {
+		res.status(400).json({ error: validate })
 	}
-	tweets.push(tweetObj)
-	console.log(tweets)
-	res.json("OK")
 })
 
 app.get("/tweets", (req, res) => {
-	console.log(tweets)
+	console.log(tweets, "67")
 	const latestTweets = []
 	let count = 10
 	if (tweets.length > 0) {
@@ -60,6 +86,8 @@ app.get("/tweets", (req, res) => {
 		res.json(latestTweets)
 	} else res.json(latestTweets)
 })
+
+app.get("/tweets/:USERNAME", (req, res) => {})
 
 app.listen(5000, () => {
 	console.log("Server is running on port 5000")
